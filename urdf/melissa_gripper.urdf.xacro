@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <property name="M_PI" value="3.1415926535897931" />
+  <!-- Melissa Gripper -->
+  <xacro:macro name="melissa_gripper" params="side parent reflect *origin">
+    <joint name="${side}_gripper_bracket" type="fixed">
+      <insert_block name="origin" /> <!-- transform from parent link to this joint frame -->
+      <parent link="${parent}"/>
+      <child link="${side}_gripper_wrist"/>
+    </joint>
+    <link name="${side}_gripper_wrist">
+      <visual>
+	<origin xyz="0 0 0" rpy="${M_PI / 2} 0 0"/>
+	<geometry>
+	  <mesh filename="package://melissa_gripper/urdf/meshes/melissa_palm.dae" scale="1 1 1" />
+	</geometry>
+      </visual>
+      <collision>
+	<origin xyz="0 0 0" rpy="0 0 0"/>
+	<geometry>
+	  <mesh filename="package://melissa_gripper/urdf/meshes/melissa_palm.dae" scale="1 1 1" />
+	</geometry>
+      </collision>
+    </link>
+    <joint name="${side}_gripper_joint_1" type="revolute">
+      <origin xyz="0 0.01625 0" rpy="${M_PI / 2} 0 0"/>
+      <axis xyz="0 0 -1" />
+      <limit upper="${M_PI / 2}" lower="0" effort="10" velocity="10" />
+      <parent link="${side}_gripper_wrist"/>
+      <child link="${side}_gripper_finger_1"/>
+    </joint>
+    <link name="${side}_gripper_finger_1">
+      <visual>
+	<origin xyz="0 0 0" rpy="0 0 0"/>
+	<geometry>
+	  <mesh filename="package://melissa_gripper/urdf/meshes/melissa_finger.dae" scale="1 1 1" />
+	</geometry>
+      </visual>
+      <collision>
+	<origin xyz="0 0 0" rpy="0 0 0"/>
+	<geometry>
+	  <mesh filename="package://melissa_gripper/urdf/meshes/melissa_finger.dae" scale="1 1 1" />
+	</geometry>
+      </collision>
+    </link>
+    <joint name="${side}_gripper_joint_2" type="revolute">
+      <origin xyz="-0.0225 0.01625 0" rpy="${M_PI / 2} 0 ${M_PI}"/>
+      <mimic joint="${side}_gripper_joint_1" /> 
+      <axis xyz="0 0 -1" />
+      <limit upper="${M_PI / 2}" lower="0" effort="10" velocity="10" />
+      <parent link="${side}_gripper_wrist"/>
+      <child link="${side}_gripper_finger_2"/>
+    </joint>
+    <link name="${side}_gripper_finger_2">
+      <visual>
+	<origin xyz="0 0 0" rpy="0 0 0"/>
+	<geometry>
+	  <mesh filename="package://melissa_gripper/urdf/meshes/melissa_finger.dae" scale="1 1 1" />
+	</geometry>
+      </visual>
+      <collision>
+	<origin xyz="0.0 0 0" rpy="0 0 0"/>
+	<geometry>
+	  <mesh filename="package://melissa_gripper/urdf/meshes/melissa_finger.dae" scale="1 1 1" />
+	</geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+</robot>
