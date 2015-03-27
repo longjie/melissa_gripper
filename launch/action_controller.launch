@@ -1,0 +1,15 @@
+<launch>
+  <!-- Load Kondo ICS parameters -->
+  <rosparam file="$(find melissa_gripper)/config/driver_sample.yaml" command="load" ns="kondo_driver"/>
+
+  <!-- Start ICS driver -->
+  <node name="kondo_driver" pkg="kondo_driver" type="kondo_driver" args="motor_0_driver" output="screen" />
+
+  <!-- Load URDF model -->
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find melissa_gripper)/urdf/sample.urdf'" />
+
+  <!-- Load gripper controller -->
+  <rosparam file="$(find melissa_gripper)/config/action_controller.yaml" />
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="--shutdown-timeout 0.1 joint_state_controller gripper_controller"/> 
+
+</launch>
