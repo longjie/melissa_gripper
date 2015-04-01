@@ -1,9 +1,15 @@
 <launch>
-  <arg name="launch_driver" default="false" />	
-  <!-- Load Kondo ICS parameters -->
-  <rosparam file="$(find melissa_gripper)/config/driver_sample.yaml" command="load" ns="kondo_driver" />
+  <arg name="launch_driver" default="true" />
+
+  <!-- run ICS driver as loopback (i.e. no hardware control) if true -->
+  <arg name="loopback" default="false" />
+
   <!-- Start ICS driver -->
-  <node if="$(arg launch_driver)" name="kondo_driver" pkg="kondo_driver" type="kondo_driver" args="motor_0_driver" output="screen" />
+  <node if="$(arg launch_driver)" name="kondo_driver" pkg="kondo_driver" type="kondo_driver" args="motor_0_driver" output="screen">
+    <!-- Load Kondo ICS parameters -->
+    <rosparam file="$(find melissa_gripper)/config/driver_sample.yaml" command="load" />
+    <param name="loopback" value="$(arg loopback)"/>
+  </node>
 
   <!-- Load URDF model -->
   <param name="robot_description" command="$(find xacro)/xacro.py '$(find melissa_gripper)/urdf/sample.urdf'" />
@@ -11,5 +17,7 @@
   <!-- Load gripper controller -->
   <rosparam file="$(find melissa_gripper)/config/controller_sample.yaml" />
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="--shutdown-timeout 0.1 joint_state_controller gripper_controller"/> 
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
 </launch>

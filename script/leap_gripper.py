@@ -5,26 +5,33 @@ import rospy
 import rospkg
 import tf
 import math
+import actionlib
+from control_msgs.msg import GripperCommandAction, GripperCommandGoal
 
 class LeapGripper:
     def __init__(self):
         self.listener = tf.TransformListener()
+        self.ac = actionlib.SimpleActionClient('/gripper_controller/gripper_cmd', GripperCommandAction)
+        rospy.loginfo('Waiting for gripper command action...')
+        self.ac.wait_for_server()
+        rospy.loginfo('Found gripper action!')
+
     def update(self):
         try:
-            (r_pos, r_rot) = self.listener.lookupTransform('/right_hand_thumb_tip', '/right_hand_pinky_tip', rospy.Time(0))
-            (l_pos, l_rot) = self.listener.lookupTransform('/left_hand_thumb_tip', '/left_hand_pinky_tip', rospy.Time(0))
-            r_dist = math.sqrt(r_pos[0]**2+r_pos[1]**2+r_pos[2]**2)
-            l_dist = math.sqrt(l_pos[0]**2+l_pos[1]**2+l_pos[2]**2)
-            rospy.loginfo("r_dist: %s", r_dist)
-            rospy.loginfo("l_dist: %s", l_dist)
+            (pos, rot) = self.listener.lookupTransform('/right_hand_thumb_tip', '/right_hand_pinky_tip', rospy.Time(0))
 
-        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            dist = math.sqrt(pos[0]**2+pos[1]**2+pos[2]**2)
+            goal = GripperCommandGoal()
+            goal.command.position = 5*(dist - 0.03);
+            self.ac.send_goal(goal)
+            rospy.loginfo("dist: %s", dist)
+        except (tf.Exception):
             pass
 
 if __name__ == '__main__':
     rospy.init_node('leap_gripper')
     leap_gripper = LeapGripper()
-    rate = rospy.Rate(10.0)
+    rate = rospy.Rate(50.0)
     while not rospy.is_shutdown():
         try:
             leap_gripper.update()
